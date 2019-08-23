@@ -193,6 +193,20 @@ def run_concolic_nc(model):
     test_cases = []
     adversarials = []
 
+    # duc anh-begin
+    print()
+    print(f'num of layers = {len(model.layers)}')
+    for idx, layer in enumerate(model.layers):
+        print(f'\tlayer {idx} = {layer} (layer name = {layer.name})')
+
+        if is_dense_layer(layer):
+            print('\tis a dense layer')
+        if is_conv_layer(layer):
+            print('\tis a conv layer')
+        print()
+    print()
+    # duc anh-end
+
     for l in range(0, len(model.layers)):
         layer = model.layers[l]
         name = layer.name
@@ -202,6 +216,12 @@ def run_concolic_nc(model):
 
         if is_conv_layer(layer) or is_dense_layer(layer):
             effective_layers.append(effective_layert(layer_index=l, current_layer=layer, is_conv=is_conv_layer(layer)))
+    
+    # duc anh-begin
+    #for l in range(0, len(layer_functions)):
+    print(f'num of layer_functions = {len(layer_functions)}')
+    print(f'size of effective_layers = {len(effective_layers)}')
+    # duc anh-end
 
     ## to configure 'fk' at each effective layer
     activations = eval_batch(layer_functions, x_train[0:10000])
@@ -303,6 +323,37 @@ def run_concolic_nc(model):
 
     print('All properties have been covered')
 
+# duc anh - begin
+def load_model_lenet1_mnist(my_lenet1_mnist):
+    kernel_size = (5, 5)
+    nb_classes = 10
+
+    # input image dimensions
+    img_rows, img_cols = 28, 28
+    input_shape = (img_rows, img_cols, 1)
+    input_tensor = Input(shape=input_shape)
+
+    # block1
+    x = Convolution2D(4, kernel_size, activation='relu', padding='same', name='block1_conv1')(input_tensor)
+    x = MaxPooling2D(pool_size=(2, 2), name='block1_pool1')(x)
+
+    # block2
+    x = Convolution2D(12, kernel_size, activation='relu', padding='same', name='block2_conv1')(x)
+    x = MaxPooling2D(pool_size=(2, 2), name='block2_pool1')(x)
+
+    x = Flatten(name='flatten')(x)
+    x = Dense(nb_classes, name='before_softmax')(x)
+    x = Activation('softmax', name='predictions')(x)
+
+    model = Model(input_tensor, x)
+    model.load_weights(my_lenet1_mnist)
+
+    from keras.models import model_from_json
+    #print(f'model json = {model.to_json()}')
+    print(f'model.inputs = {model.inputs}')
+    print(f'model.outputs = {model.outputs}')
+    return model
+# duc anh - end
 
 def main():
     parser = argparse.ArgumentParser(
@@ -311,7 +362,14 @@ def main():
     parser.add_argument('model', action='store', nargs='+', help='The input neural network model (.h5)')
 
     args = parser.parse_args()
-    model = load_model(args.model[0])
+    
+    # duc anh - begin
+    my_lenet1_mnist='/Users/ducanhnguyen/Documents/python/ml_testing/DeepConcolic/saved_models/mnist_LeNet1.h5'
+    if args.model[0]==my_lenet1_mnist:
+        model = load_model_lenet1_mnist(my_lenet1_mnist)
+    else:
+        # duc anh - end
+        model = load_model(args.model[0])
 
     run_concolic_nc(model)
 
