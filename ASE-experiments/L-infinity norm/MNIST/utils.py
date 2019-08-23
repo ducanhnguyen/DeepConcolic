@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 
 
 def is_conv_layer(layer):
-    return (layer.name.find('conv') >= 0)
+    return (str(layer).lower().find('conv') >= 0)
 
 
 def is_dense_layer(layer):
-    return (layer.name.find('dense') >= 0)
+    return (str(layer).lower().find('dense') >= 0)
 
 
 def is_activation_layer(layer):
