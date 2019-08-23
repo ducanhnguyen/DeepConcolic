@@ -3,6 +3,8 @@ Neuron Cover of MNIST based on L-infinity Norm
 
 Author: Youcheng Sun
 Email: youcheng.sun@cs.ox.ac.uk
+
+python3 MNIST_nc.py ~/Documents/python/ml_testing/DeepConcolic/saved_models/mnist_LeNet1.h5
 """
 
 import argparse
@@ -58,7 +60,7 @@ class effective_layert:
         else:
             # self.cover_map=np.ones((1, sp[1]))
             self.cover_map = np.zeros((1, sp[1]), dtype=bool)
-        print 'Created an effective layer: [is_conv {0}] [cover_map {1}]'.format(is_conv, self.cover_map.shape)
+        print(f'Created an effective layer: [is_conv {0}] [cover_map {1}]'.format(is_conv, self.cover_map.shape))
 
     ## return the argmax and the max value:
     def get_max(self):
@@ -77,7 +79,7 @@ class effective_layert:
     def cover_an_activation(self, sp):
         if self.is_conv:
             self.activations[sp[0]][sp[1]][sp[2]][sp[3]][sp[4]] = 0  # minus_inf
-            print 'cover an activation', sp, self.activations[sp[0]][sp[1]][sp[2]][sp[3]][sp[4]]
+            print(f'cover an activation', sp, self.activations[sp[0]][sp[1]][sp[2]][sp[3]][sp[4]])
         else:
             self.activations[sp[0]][sp[1]][sp[2]] = 0  # minus_inf
 
@@ -181,6 +183,7 @@ def initialise_effective_layers(effective_layers, layer_functions, im):
 
 def run_concolic_nc(model):
     ##
+    import os
     outs = "concolic-nc" + str(datetime.now()).replace(' ', '-') + '/'
     os.system('mkdir -p {0}'.format(outs))
 
@@ -210,7 +213,7 @@ def run_concolic_nc(model):
     av = np.average(np.array(fks))
     for i in range(0, len(fks)):
         effective_layers[i].fk = av / fks[i]
-        print effective_layers[i].fk
+        print(effective_layers[i].fk)
     ##sys.exit(0)
     ##
 
@@ -238,17 +241,17 @@ def run_concolic_nc(model):
         ## to choose the max
         nc_layer, nc_index, nc_value = get_max(effective_layers)
         pos = np.unravel_index(nc_index, np.array(nc_layer.activations).shape)
-        print pos
-        print len(test_cases)
+        print(pos)
+        print(len(test_cases))
         im = test_cases[pos[0]]
         activations = eval(layer_functions, im)
-        print 'The chosen test is {0}: {1} at layer {2}'.format(pos, nc_value, nc_layer.layer_index)
+        print(f'The chosen test is {0}: {1} at layer {2}'.format(pos, nc_value, nc_layer.layer_index))
         if len(pos) > 3:
-            print nc_layer.activations[pos[0]][pos[1]][pos[2]][pos[3]][pos[4]]
-            print activations[nc_layer.layer_index][pos[1]][pos[2]][pos[3]][pos[4]]
+            print(nc_layer.activations[pos[0]][pos[1]][pos[2]][pos[3]][pos[4]])
+            print(activations[nc_layer.layer_index][pos[1]][pos[2]][pos[3]][pos[4]])
         else:
-            print nc_layer.activations[pos[0]][pos[1]][pos[2]]
-            print activations[nc_layer.layer_index][pos[1]][pos[2]]
+            print(nc_layer.activations[pos[0]][pos[1]][pos[2]])
+            print(activations[nc_layer.layer_index][pos[1]][pos[2]])
 
         ##
         sp = np.array(nc_layer.activations).shape
@@ -260,23 +263,23 @@ def run_concolic_nc(model):
         # feasible, d, new_im=negate(model, activations, nc_layer, nc_index_, im_seed)
         ##
 
-        print 'lp done'
+        print('lp done')
 
         if feasible:
-            print 'feasible: d={0}'.format(d)
+            print(f'feasible: d={0}'.format(d))
             found_before = False
             for t in test_cases:
                 if (new_im == t).all():
                     found_before = True
-                    print 'found'
+                    print('found')
                     ##sys.exit(0)
                     break
             if found_before:
                 nc_layer.cover_an_activation(pos)
                 continue
             test_cases.append(new_im)
-            print  '\n[{0}][{1}]'.format(model.predict_classes(np.array([im]))[0],
-                                         model.predict_classes(np.array([new_im]))[0])
+            print(f'\n[{0}][{1}]'.format(model.predict_classes(np.array([im]))[0],
+                                         model.predict_classes(np.array([new_im]))[0]))
             y1 = model.predict_classes(np.array([im]))[0]
             y2 = model.predict_classes(np.array([new_im]))[0]
             if y1 != y2:
@@ -298,7 +301,7 @@ def run_concolic_nc(model):
                                                             len(adversarials), d, nc_layer.layer_index, pos))
         f.close()
 
-    print 'All properties have been covered'
+    print('All properties have been covered')
 
 
 def main():

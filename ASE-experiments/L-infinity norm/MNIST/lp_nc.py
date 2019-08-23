@@ -103,8 +103,8 @@ def negate(model, activations, nc_layer, nc_index, im):
                     var_names[l + 1][I][J] = var_name
                     var_names_vect.append(var_name)
         else:
-            print 'Un-expected layer!!!'
-            print layer, l
+            print('Un-expected layer!!!')
+            print(layer, l)
             # sys.exit(0)
 
     constraints = []
@@ -199,15 +199,15 @@ def negate(model, activations, nc_layer, nc_index, im):
                                     if activations[l][I][J][K][L] > 0:
                                         rhs.append(-epsilon)
                                         constraint_senses.append('L')
-                                        print 'to negate activated neuron...'
-                                        print 'negate: x_{0}_{1}_{2}_{3}_{4}'.format(l + 1, I, J, K, L)
-                                        print activations[l][I][J][K][L]
-                                        print activations[l].shape
+                                        print('to negate activated neuron...')
+                                        print('negate: x_{0}_{1}_{2}_{3}_{4}'.format(l + 1, I, J, K, L))
+                                        print(activations[l][I][J][K][L])
+                                        print(activations[l].shape)
                                         sys.exit(0)
                                     else:
                                         rhs.append(epsilon)
                                         constraint_senses.append('G')
-                                        print 'negate: x_{0}_{1}_{2}_{3}_{4}'.format(l + 1, I, J, K, L)
+                                        print('negate: x_{0}_{1}_{2}_{3}_{4}'.format(l + 1, I, J, K, L))
                                     constraint_names.append('negate: x_{0}_{1}_{2}_{3}_{4}'.format(l + 1, I, J, K, L))
 
 
@@ -345,7 +345,7 @@ def negate(model, activations, nc_layer, nc_index, im):
         d = problem.solution.get_values("d")
         if d == 0:
             return False, -1, None
-        print '***the target var: ', problem.solution.get_values(target_var)
+        print('***the target var: ', problem.solution.get_values(target_var))
         # print 'distance d is: {0}'.format(d)
         new_x = np.zeros((var_names[0].shape[1], var_names[0].shape[2], var_names[0].shape[3]))
         for I in range(0, var_names[0].shape[1]):
@@ -359,5 +359,5 @@ def negate(model, activations, nc_layer, nc_index, im):
                     new_x[I][J][K] = v
         return True, d, new_x
     except:
-        print 'there is one except'
+        print('there is one except')
         return False, -1, None

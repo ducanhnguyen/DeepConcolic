@@ -49,7 +49,7 @@ def eval_batch(layer_functions, ims):
 def show_adversarial_examples(imgs, ys, name):
     for i in range(0, 2):
         plt.subplot(1, 2, 1 + i)
-        print 'imgs[i].shape is ', imgs[i].shape
+        print('imgs[i].shape is ', imgs[i].shape)
         plt.imshow(imgs[i].reshape([28, 28]), cmap=plt.get_cmap('gray'))
         plt.title("label: " + str(ys[i]))
         plt.savefig(name, bbox_inches='tight')
